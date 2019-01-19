@@ -1,8 +1,19 @@
-
+#include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
 
+void sig_handler(int signo){
+ if (signo == SIGUSR1){
+     printf("Signal caught\n");
+ }
+}
 
+void send_signal (int pid){
+    int ret;
+    ret = kill(pid, SIGUSR1);
+    printf("ret : %d",ret);
+
+}
 
 void printpid(){
   int pid;
