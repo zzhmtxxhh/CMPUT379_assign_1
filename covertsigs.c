@@ -37,6 +37,7 @@ static void HandleHostSignal(void)
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_SIGINFO;
     sa.sa_handler = sig_handler;
+    sa.sa_sigaction = get_pid;
     sigaction(SIGUSR1, &sa, NULL);
 }
 
@@ -56,9 +57,17 @@ int main(){
     //     printf("Can't catch SIGUSR1\n");
     // }
 
-
+    int check = 0;
     while(1){
+        
         sleep(1);
+        while(signalPid != -1 && check != 1){
+            printf("PID of signal sender = %d\n", signalPid);
+            check = 1;
+            break;
+        }
+
+
     }                        //wait for a signal
     //printf("PID of signal sender = %d\n", signalPid);
     // sigemptyset(&sa.sa_mask);
