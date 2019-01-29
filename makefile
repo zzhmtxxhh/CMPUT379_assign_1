@@ -1,2 +1,2 @@
 all:
-	gcc Assignment_1.c -o main -lm
+	gcc conversigs.c -o main -lm
