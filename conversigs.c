@@ -6,11 +6,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define _GNU_SOURCE
 char *incoming_binary[8];
 char *incoming_string[1024];
 // incoming_binary[0] = '\0';
-int flag = 0;
+
 int signal_counter = 0;
 int counter_sig1= 0;
 int counter_sig2 = 0; //keeps track of how many signals process recieves
@@ -26,8 +25,6 @@ void printPID(){
     int pid = getpid();
     printf("Own PID: %d\n", pid);
 }
-
-
 
 void handler(int signal) {
   // printf("Signal!!!\n");
@@ -73,27 +70,27 @@ void handler(int signal) {
 //     }
 // }
 
-static void HandleHostSignal(void){
-    // struct sigaction act;
-    // sigemptyset(&act.sa_mask); //clear/initialize the sa mask, which signals to block, set to none.
-    // //act.sa_flags = SA_SIGINFO;
-    // act.sa_flags = 0;
-    // act.sa_handler = sigHandler;
-    // act.sa_sigaction = get_pid;
-    // //act.sa_flags |= SA_RESTART;
-    // sigaction(SIGUSR1, &act, NULL);
-    // sigaction(SIGUSR2, &act, NULL);
+// static void HandleHostSignal(void){
+//     // struct sigaction act;
+//     // sigemptyset(&act.sa_mask); //clear/initialize the sa mask, which signals to block, set to none.
+//     // //act.sa_flags = SA_SIGINFO;
+//     // act.sa_flags = 0;
+//     // act.sa_handler = sigHandler;
+//     // act.sa_sigaction = get_pid;
+//     // //act.sa_flags |= SA_RESTART;
+//     // sigaction(SIGUSR1, &act, NULL);
+//     // sigaction(SIGUSR2, &act, NULL);
 
-  struct sigaction sa;
-  sa.sa_handler = handler;
-  sigemptyset(&sa.sa_mask);
-  sa.sa_flags = 0;
-  sa.sa_flags = SA_RESTART;
+//   struct sigaction sa;
+//   sa.sa_handler = handler;
+//   sigemptyset(&sa.sa_mask);
+//   sa.sa_flags = 0;
+//   sa.sa_flags = SA_RESTART;
 
-  sigaction(SIGUSR1, &sa, NULL);
-  sigaction(SIGUSR2, &sa, NULL);
-  // printf("len of incoming string %d\n", strlen(incoming_string));
-}
+//   sigaction(SIGUSR1, &sa, NULL);
+//   sigaction(SIGUSR2, &sa, NULL);
+//   // printf("len of incoming string %d\n", strlen(incoming_string));
+// }
 
 void sendSignal(int pid, int signo){
     int ret;
@@ -139,29 +136,45 @@ void linefeed(int pid){
 
 
 int main(int argc, char *argv[]){
-    fflush(stdout);
-    printPID();
-    HandleHostSignal();
+    struct sigaction act;
 
+    sigemptyset(&act.sa_mask); //clear/initialize the sa mask, which signals to block, set to none.
+    act.sa_flags = SA_SIGINFO;
+    act.sa_handler = get_pid;
+    act.sa_handler = sigHandler;
+    //act.sa_flags |= SA_RESTART;
+    sigaction(SIGUSR1, &act, NULL);
+    sigaction(SIGUSR2, &act, NULL);
+    
+    printPID();
     int target_pid;
     scanf("%d", &target_pid);
     printf("Target pid: %d\n", target_pid);
-
+    getchar();
+    
     while(1){
-
+        printf("1st while loop\n");
         char buf_in[MAX_INPUT];
         while(1){
-
             //sleep(1);
-            scanf("%s", buf_in);
-            while((getchar())!= '\n');
-            //if(errno == EINTR) printf("scanf interrupted");
-            if (strcmp(buf_in, "done") == 0){      //exit program
-                printf("counter_usr1 = %d\n", counter_sig1);
-                printf("counter_usr2 = %d\n", counter_sig2);
+            //scanf("%s", buf_in);
+            fgets(buf_in, MAX_INPUT, stdin);
+            //getchar();
+            //printf("after scanf\n");
+        
+            if(errno == EINTR) {
+                printf("In errno\n");
+                errno = 0;
+                continue;
+            }
+            if (strcmp(buf_in, "done\n") == 0){      //exit program
+                printf("counter_usr1 = %d\n", counter_usr1);
+                printf("counter_usr2 = %d\n", counter_usr2);
                 return 0;
             }
+
             printf("Output: %s\n", buf_in);
+            
 
             size_t length = strlen(buf_in);
             //printf("%zu\n", length);
@@ -172,18 +185,16 @@ int main(int argc, char *argv[]){
             for (int i = 0; i < length*8; i++){
                 char b = (char)binary[i];
                 if(b == '0'){
-                    usleep(20);
                     sendSignal(target_pid, SIGUSR1);
-                    printf("sent SIGUSR1\n");
+                    printf("sent SIGUSR1 = 0\n");
+                    usleep(200);
                 }else if (b == '1'){
-                    usleep(20);
                     sendSignal(target_pid, SIGUSR2);
-                    printf("sent SIGUSR2\n");
+                    printf("sent SIGUSR2 = 1\n");
+                    usleep(200);
                 }
             }
-            // printf("%s\n","linefeed" );
-            // linefeed(target_pid);
         }
-    }
+    }       
     return 0;
 }
