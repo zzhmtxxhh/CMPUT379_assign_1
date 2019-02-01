@@ -3,7 +3,7 @@ Team members: Zhihao Zhang (zhihao9), Siyu Mi (smi2)
 
 Design Questions:
 
-1. For the one signal option, we used SIGUSR1 to represent both bits 0 and 1. We used SIGALRM to send a signal to the process itself every 0.5 seconds. The messages are converted into ASCII code, then into binary code. If we wanted to send bit 0, then we sent 1 SIGUSR1 in 0.5 seconds. If we wanted to send bit 1, then we sent 5 SIGUSR1 in 0.5 seconds. After the alarm's time is up, depending on the number of signals we have received, it is interpreted as either a 0 (if 1 signal was received) or a 1 (if 5 signals was received).
+1. For the one signal option, we used SIGUSR1 to represent both bits 0 and 1. We used SIGALRM to send a signal to itself every 0.5 seconds. The messages are converted into ASCII code, then into binary code. If we wanted to send bit 0, then we sent 1 SIGUSR1 in 0.5 seconds. If we wanted to send bit 1, then we sent 5 SIGUSR1 in 0.5 seconds. After the alarm's time is up, depending on the number of signals we have received, it is interpreted as either a 0 (if 1 signal was received) or a 1 (if 5 signals was received).
 
 2. For the two signal option, we used SIGUSR1 to represent bit 0 and SIGUSR2 to represent bit 1. The messages are converted into ASCII code, then into binary code. On the receiver process' side, if a SIGUSR1 is received, then it will be interpreted as a 0, and if a SIGUSR2 is received then it will be interpreted as a 1.
 
@@ -15,7 +15,7 @@ Design Questions:
 
 6. When a message is received, it enters the signal handler. While it is in there, signals SIGUSR1 and SIGUSR2 are blocked. Once the signal has been handled, the program returns to its place in the main function, and continues where it left off.
 
-7. The only signal we used other than SIGUSR1 and SIGUSR2 was SIGALRM. We used SIGALRM to time the intervals within which a bit is received.
+7. The only signal we used other than SIGUSR1 and SIGUSR2 was SIGALRM. We used SIGALRM to time the intervals within which SIGUSR1's are received.
 
 8. We saved CPU by leaving the program promptly after the user quits by input ".".
 
