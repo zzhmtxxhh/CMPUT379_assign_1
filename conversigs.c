@@ -91,8 +91,13 @@ char* stringToBinary(char* s) {
 
 static void HandleHostSignal(void){
     struct sigaction sa;
+    sigset_t set;
+    sigemptyset(&sa.sa_mask);
+    sigaddset(&set,SIGUSR1);
+    sigaddset(&set,SIGUSR2);
     sa.sa_handler = sigHandler;
-    sigemptyset(&sa.sa_mask); //clear/initialize the sa mask, which signals to block, set to none
+    sa.sa_mask = set;
+     //clear/initialize the sa mask, which signals to block, set to none
     sa.sa_flags = SA_SIGINFO;
     //act.sa_flags |= SA_RESTART;
     sigaction(SIGUSR1, &sa, NULL);
@@ -104,10 +109,7 @@ static void HandleHostSignal(void){
 int main(int argc, char *argv[]){
     fflush(stdout);
     HandleHostSignal();
-    
-
     printPID();
-    
   
     int target_pid;
     scanf("%d", &target_pid);
