@@ -28,7 +28,7 @@ void sigHandler(int signo){
     if(signo == SIGUSR1){
         signal_counter++;
         if (signal_counter == 8){
-            ualarm(500000, 500000);
+            ualarm(50000, 50000);
             signal_counter = 0;
         }
     }
@@ -90,29 +90,30 @@ char* stringToBinary(char* s) {
 
 
 void eightBit(int pid){
-    usleep(249125);
+    usleep(24912);
     sendSignal(pid, SIGUSR1);
-    usleep(250);
+    usleep(25);
     sendSignal(pid, SIGUSR1);
-    usleep(250);
+    usleep(25);
     sendSignal(pid, SIGUSR1);
-    usleep(250);
+    usleep(25);
     sendSignal(pid, SIGUSR1);
-    usleep(250);
+    usleep(25);
     sendSignal(pid, SIGUSR1);
-    usleep(250);
+    usleep(25);
     sendSignal(pid, SIGUSR1);
-    usleep(250);
+    usleep(25);
     sendSignal(pid, SIGUSR1);
-    usleep(250);
+    usleep(25);
     sendSignal(pid, SIGUSR1);
-    usleep(249125);
+    usleep(24913);
 }
 
 static void HandleAlrmSignal(void){
     struct sigaction sa;
     sigset_t set;
     sigaddset(&set, SIGUSR1);
+    sigaddset(&set, SIGALRM);
     sa.sa_handler = sigHandler;
     sigemptyset(&sa.sa_mask); //clear/initialize the sa mask, which signals to block, set to none
     sa.sa_mask = set;
@@ -153,33 +154,33 @@ int main(int argc, char *argv[]){
 
             printf("User input: %s\n", buf_in);
             eightBit(target_pid);
-            usleep(500000);
+            usleep(50000);
 
             size_t length = strlen(buf_in);
 
-            usleep(500000);
+            usleep(50000);
             char* binary = stringToBinary(buf_in);
 
             for (int i = 0; i < length*8; i++){
                 char b = (char)binary[i];
                 if(b == '0'){
-                    usleep(250000);
+                    usleep(25000);
                     sendSignal(target_pid, SIGUSR1);
                     fflush(stdout);
-                    usleep(250000); 
+                    usleep(25000); 
                 }
                 else if (b == '1'){
-                    usleep(249000);
+                    usleep(24900);
                     sendSignal(target_pid, SIGUSR1);
-                    usleep(500);
+                    usleep(50);
                     sendSignal(target_pid, SIGUSR1);
-                    usleep(500);
+                    usleep(50);
                     sendSignal(target_pid, SIGUSR1);
-                    usleep(500);
+                    usleep(50);
                     sendSignal(target_pid, SIGUSR1);
-                    usleep(500);
+                    usleep(50);
                     sendSignal(target_pid, SIGUSR1);
-                    usleep(249000);
+                    usleep(24900);
                     fflush(stdout);
                 }
             }
