@@ -15,12 +15,27 @@
 
 char *incoming_binary[8];
 char *incoming_string[1024];
+int mark_flag = 0 ;
 
 int signal_counter = 0;
 int counter_usr1= 0;
 int counter_usr2 = 0; //keeps track of how many signals process recieves
 
-//volatile sig_atomic_t stop;
+void checkmess(int num){
+    int char_num = num;
+    if(char_num<=127 && char_num>=1 && mark_flag == 0){
+        printf("! ");
+        mark_flag = 1;
+    }else if (char_num>127 && char_num<1 && mark_flag == 0){
+        printf("? ");
+        mark_flag = 1;
+    }
+    if(char_num == 10){
+        mark_flag = 0;
+    }
+
+}
+
 
 static volatile int signalPid = -1;
 void get_pid(int sig, siginfo_t *info, void *context){
@@ -35,24 +50,23 @@ void printPID(){
 
 void sigHandler(int signo){
     if (signo == SIGUSR1){
-        //printf("recieved SIGUSR1 = 0\n");
-        //printf("PID of signal = %d\n", signalPid);
         ++counter_usr1;
         strcat(incoming_binary, "0");
     }
     else if(signo == SIGUSR2){
-        //printf("recieved SIGUSR2 = 1\n");
-        //printf("PID of signal = %d\n", signalPid);
         ++counter_usr2;
         strcat(incoming_binary, "1");
     }
     if (strlen(incoming_binary)>= 8){
-    // printf("%s\n", incoming_binary);
-    // printf("%s\n", "strtol");
         char c = strtol(incoming_binary, 0, 2);
-        printf("%c", c);
-    
+        int char_num = (int)(c);
+        // printf("%d",char_num);
+        checkmess(char_num);
         fflush(stdout);
+
+        printf("%c", c);
+        fflush(stdout);
+  
         strcat(incoming_string,&c);
         memset(incoming_binary, 0, 8);
   }
@@ -102,7 +116,6 @@ static void HandleHostSignal(void){
     //act.sa_flags |= SA_RESTART;
     sigaction(SIGUSR1, &sa, NULL);
     sigaction(SIGUSR2, &sa, NULL);
-
 }
 
 
@@ -118,20 +131,11 @@ int main(int argc, char *argv[]){
     
     
     while(1){
-        //printf("1st while loop\n");
         char buf_in[MAX_INPUT];
         while(1){
-            //sleep(1);
-            //while((getchar())!= '\n');
-            //printf("2nd while loop\n");
-            //scanf("%s", buf_in);
             fgets(buf_in, MAX_INPUT, stdin);
-            //getchar();
-            //printf("after scanf\n");
-        
-            
             if(errno == EINTR) {
-                //printf("In errno\n");
+                // printf("in error\n");
                 errno = 0;
                 continue;
             }
@@ -140,17 +144,10 @@ int main(int argc, char *argv[]){
                 printf("counter_usr2 = %d\n", counter_usr2);
                 return 0;
             }
-
-
             printf("Output: %s\n", buf_in);
             
-
             size_t length = strlen(buf_in);
-            //printf("%zu\n", length);
-            //printf("%s\n", stringToBinary(buf_in));
-
             char* binary = stringToBinary(buf_in);
-
             for (int i = 0; i < length*8; i++){
                 char b = (char)binary[i];
                 if(b == '0'){
