@@ -42,4 +42,4 @@ Balance of Work:
 Converting from message to signals was implemented by Siyu, converting from signals back to message was implemented by Zhihao. The rest of the implementation, including the single and double options were all programmed together. 
 
 
-*Our code was tested on the official VM.
+*Our code was tested on the csc 219 lab machine.
